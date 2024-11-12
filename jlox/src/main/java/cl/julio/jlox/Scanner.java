@@ -80,7 +80,9 @@ public class Scanner {
                 addToken(match('=') ? GREATER_EQUAL : GREATER);
                 break;
             case '/':
-                if (match('/')) {
+                if (match('*')) {
+                    multilineComment();
+                } else if (match('/')) {
                     // Consume characters until EOL.
                     while (peek() != '\n' && !isAtEnd()) {
                         advance();
@@ -147,6 +149,22 @@ public class Scanner {
         if (current + 1 >= source.length()) return '\0';
 
         return source.charAt(current + 1);
+    }
+
+    private void multilineComment() {
+        while (peek() != '*' && peekNext() != '/' && !isAtEnd()) {
+            if (peek() == '\n') line++;
+
+            advance();
+        }
+
+        if (isAtEnd() || peek() != '*' || peekNext() != '/') {
+            Lox.error(line, "Unterminated multiline comment.");
+            return;
+        }
+
+        advance(); // Consume "*".
+        advance(); // Consume "/".
     }
 
     private void string() {
