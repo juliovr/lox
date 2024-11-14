@@ -22,7 +22,15 @@ public class Parser {
     }
 
     private Expr expression() {
-        return equality();
+        Expr expr = equality();
+
+        // Support for comma to separate expressions. See: https://en.wikipedia.org/wiki/Comma_operator
+        // expression     -> equality | (",") expression ;
+        if (match(COMMA)) {
+            expr = expression();
+        }
+
+        return expr;
     }
 
     private Expr equality() {
