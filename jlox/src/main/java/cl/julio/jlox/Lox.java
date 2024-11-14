@@ -1,5 +1,7 @@
 package cl.julio.jlox;
 
+import cl.julio.tool.GenerateAst;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -49,13 +51,26 @@ public class Lox {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.scanTokens();
 
-        for (Token token : tokens) {
-            System.out.println(token);
+        Parser parser = new Parser(tokens);
+        Expr expr = parser.parse();
+
+        if (hadError) {
+            return;
         }
+
+        System.out.println(new AstPrinter().print(expr));
     }
 
     static void error(int line, String message) {
         report(line, "", message);
+    }
+
+    static void error(Token token, String message) {
+        if (token.type == TokenType.EOF) {
+            report(token.line, "at end", message);
+        } else {
+            report(token.line, "at '" + token.lexeme + "'", message);
+        }
     }
 
     private static void report(int line, String where, String message) {
