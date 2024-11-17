@@ -28,6 +28,11 @@ public class Parser {
         // expression     -> equality | (",") expression ;
         if (match(COMMA)) {
             expr = expression();
+        } else if (match(QUESTION_MARK)) {
+            Expr left = expression();
+            consume(COLON, "Expect ':' after expression in the ternary conditional.");
+            Expr right = expression();
+            expr = new Expr.Ternary(expr, left, right);
         }
 
         return expr;

@@ -15,9 +15,9 @@ public class Scanner {
         keywords.put("and", AND);
         keywords.put("class", CLASS);
         keywords.put("else", ELSE);
-        keywords.put("FALSE", FALSE);
+        keywords.put("false", FALSE);
         keywords.put("for", FOR);
-        keywords.put("FUN", FUN);
+        keywords.put("fun", FUN);
         keywords.put("if", IF);
         keywords.put("nil", NIL);
         keywords.put("or", OR);
@@ -67,6 +67,8 @@ public class Scanner {
             case '+': addToken(PLUS); break;
             case ';': addToken(SEMICOLON); break;
             case '*': addToken(STAR); break;
+            case '?': addToken(QUESTION_MARK); break;
+            case ':': addToken(COLON); break;
             case '!':
                 addToken(match('=') ? BANG_EQUAL : BANG);
                 break;
