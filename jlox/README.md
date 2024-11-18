@@ -1,14 +1,29 @@
 # Grammar
 
 ```
-expression     → equality | (",") expression ;
+program        → declaration* EOF ;
+declaration    → varDecl
+               | statement ;
+varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
+statement      → exprStmt
+               | printStmt 
+               | block ;
+exprStmt       → expression ";" ;
+printStmt      → "print" expression ";" ;
+block          → "{" declaration* "}" ;
+
+expression     → assignment ;
+assignment     → IDENTIFIER "=" assignment
+               | equality | (",") expression | ternary ;
 ternary        → expression ("?") expression (":") expression ;
 equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term           → factor ( ( "-" | "+" ) factor )* ;
 factor         → unary ( ( "/" | "*" ) unary )* ;
 unary          → ( "!" | "-" ) unary
-                 | primary ;
-primary        → NUMBER | STRING | "true" | "false" | "nil"
-                 | "(" expression ")" ;
+               | primary ;
+primary        → "true" | "false" | "nil"
+               | NUMBER | STRING
+               | "(" expression ")"
+               | IDENTIFIER ;
 ```

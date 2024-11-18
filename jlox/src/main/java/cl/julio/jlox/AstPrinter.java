@@ -47,6 +47,16 @@ public class AstPrinter implements Expr.Visitor<String> {
         return parenthesize("ternary", expr.cond, expr.left, expr.right);
     }
 
+    @Override
+    public String visitVariableExpr(Expr.Variable expr) {
+        return parenthesize("var", expr);
+    }
+
+    @Override
+    public String visitAssignExpr(Expr.Assign expr) {
+        return parenthesize("var assign", expr);
+    }
+
     private String parenthesize(String name, Expr... exprs) {
         StringBuilder builder = new StringBuilder();
 
