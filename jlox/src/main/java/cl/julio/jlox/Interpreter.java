@@ -111,7 +111,12 @@ public class Interpreter implements Expr.Visitor<Object> {
 
     @Override
     public Object visitTernaryExpr(Expr.Ternary expr) {
-        throw new UnsupportedOperationException();
+        Object condition = evaluate(expr.cond);
+        if (isTruthy(condition)) {
+            return evaluate(expr.left);
+        } else {
+            return evaluate(expr.right);
+        }
     }
 
     private void checkNumberOperands(Token token, Object left, Object right) {
