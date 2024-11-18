@@ -45,8 +45,12 @@ public class GenerateAst {
             }
             writer.println("    }");
             writer.println();
+            writer.println();
 
-
+            writer.println("    //");
+            writer.println("    // Implementations");
+            writer.println("    //");
+            writer.println();
             // Expressions classes
             for (String type : types) {
                 String className = type.split(":")[0].trim();
