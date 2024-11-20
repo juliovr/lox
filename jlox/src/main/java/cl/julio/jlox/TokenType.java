@@ -13,6 +13,7 @@ public enum TokenType {
     LESS, LESS_EQUAL,
 
     QUESTION_MARK, COLON,
+    BREAK,
 
     // Literals
     IDENTIFIER, STRING, NUMBER,

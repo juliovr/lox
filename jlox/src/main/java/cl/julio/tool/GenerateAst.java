@@ -28,6 +28,7 @@ public class GenerateAst {
         ));
 
         defineAst(outputDir, "Stmt", Arrays.asList(
+                "Break      : Token name",
                 "Block      : List<Stmt> statements",
                 "Expression : Expr expression",
                 "If         : Expr condition, Stmt thenBranch, Stmt elseBranch",

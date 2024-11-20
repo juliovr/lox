@@ -48,6 +48,7 @@ public class Parser {
     }
 
     private Stmt statement() {
+        if (match(BREAK)) return breakStatement();
         if (match(FOR)) return forStatement();
         if (match(IF)) return ifStatement();
         if (match(PRINT)) return printStatement();
@@ -55,6 +56,12 @@ public class Parser {
         if (match(LEFT_BRACE)) return new Stmt.Block(block());
 
         return expressionStatement();
+    }
+
+    private Stmt breakStatement() {
+        Stmt breakStmt = new Stmt.Break(previous());
+        consume(SEMICOLON, "Expect ';' after value.");
+        return breakStmt;
     }
 
     private Stmt forStatement() {
