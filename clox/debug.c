@@ -33,10 +33,10 @@ int disassemble_instruction(Chunk *chunk, int offset)
 {
     printf("%04d ", offset);
 
-    if (offset > 0 && chunk->lines[offset] == chunk->lines[offset - 1]) {
+    if (offset > 0 && get_line(chunk, offset) == get_line(chunk, offset - 1)) {
         printf("   | ");
     } else {
-        printf("%4d ", chunk->lines[offset]);
+        printf("%4d ", get_line(chunk, offset));
     }
 
     u8 instruction = chunk->code[offset];
