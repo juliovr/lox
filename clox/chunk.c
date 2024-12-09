@@ -55,6 +55,7 @@ int opcode_size_operands(OpCode opcode)
     switch (opcode) {
         case OP_CONSTANT: return 1;
         case OP_CONSTANT_LONG: return 3;
+        case OP_RETURN: return 0;
     }
 
     return 0;
