@@ -8,14 +8,17 @@
 
 typedef enum {
     OP_CONSTANT,
+    OP_CONSTANT_LONG,
     OP_RETURN,
 } OpCode;
+
+int opcode_size_operands(OpCode opcode);
 
 typedef struct {
     int count;
     int capacity;
     u8 *code;
-    u16 line_index;
+    int line_index;
     u16 lines[LINES_CAPACITY]; // Note: In Run-length encoding: even_index = count, odd_index = line_number
     ValueArray constants;
 } Chunk;
@@ -23,7 +26,8 @@ typedef struct {
 void init_chunk(Chunk *chunk);
 void free_chunk(Chunk *chunk);
 void write_chunk(Chunk *chunk, u8 byte, int line);
-int add_constant(Chunk *chunk, Value value);
+void write_constant(Chunk* chunk, Value value, int line);
+int add_constant(Chunk *chunk, Value value, u8 size_bytes);
 u16 get_line(Chunk *chunk, int offset);
 
 #endif

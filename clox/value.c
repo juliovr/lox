@@ -10,16 +10,19 @@ void init_value_array(ValueArray *array)
     array->values = NULL;
 }
 
-void write_value_array(ValueArray *array, Value value)
+void write_value_array(ValueArray *array, Value value, u8 size_bytes)
 {
-    if (array->capacity < array->count + 1) {
+    if (array->capacity < array->count + size_bytes) {
         int old_capacity = array->capacity;
         array->capacity = GROW_CAPACITY(old_capacity);
         array->values = GROW_ARRAY(Value, array->values, old_capacity, array->capacity);
     }
 
-    array->values[array->count] = value;
-    array->count++;
+    for (int i = 0; i < size_bytes; i++) {
+        array->values[array->count + i] = (((int)value >> (i * 8)) & 0xFF);
+    }
+
+    array->count += size_bytes;
 }
 
 void free_value_array(ValueArray *array)
