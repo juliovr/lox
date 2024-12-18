@@ -33,6 +33,7 @@ void write_chunk(Chunk *chunk, u8 byte, int line)
     chunk->code[chunk->count] = byte;
     chunk->count++;
 
+    // RLE to store lines.
     if (chunk->line_index >= 0 && line == chunk->lines[chunk->line_index + 1]) {
         chunk->lines[chunk->line_index]++;
     } else {
@@ -61,6 +62,16 @@ int opcode_size_operands(OpCode opcode)
     return 0;
 }
 
+OpCode get_constant_opcode(Value value)
+{
+    OpCode opcode = OP_CONSTANT_LONG;
+    if ((int)value < MAX_U8) {
+        opcode = OP_CONSTANT;
+    }
+
+    return opcode;
+}
+
 void write_constant(Chunk* chunk, Value value, int line)
 {
     if ((int)value >= MAX_U16) {
@@ -68,11 +79,7 @@ void write_constant(Chunk* chunk, Value value, int line)
         exit(1);
     }
 
-    OpCode opcode = OP_CONSTANT_LONG;
-    if ((int)value < MAX_U8) {
-        opcode = OP_CONSTANT;
-    }
-
+    OpCode opcode = get_constant_opcode(value);
     u8 size_bytes = opcode_size_operands(opcode);
 
     int constant_index = add_constant(chunk, value, size_bytes);

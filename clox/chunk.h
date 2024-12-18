@@ -34,5 +34,6 @@ void write_chunk(Chunk *chunk, u8 byte, int line);
 void write_constant(Chunk* chunk, Value value, int line);
 int add_constant(Chunk *chunk, Value value, u8 size_bytes);
 u16 get_line(Chunk *chunk, int offset);
+OpCode get_constant_opcode(Value value);
 
 #endif
