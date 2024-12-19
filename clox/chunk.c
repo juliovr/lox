@@ -65,7 +65,7 @@ int opcode_size_operands(OpCode opcode)
 OpCode get_constant_opcode(Value value)
 {
     OpCode opcode = OP_CONSTANT_LONG;
-    if ((int)value < MAX_U8) {
+    if ((int)AS_NUMBER(value) < MAX_U8) {
         opcode = OP_CONSTANT;
     }
 
@@ -74,8 +74,8 @@ OpCode get_constant_opcode(Value value)
 
 void write_constant(Chunk* chunk, Value value, int line)
 {
-    if ((int)value >= MAX_U16) {
-        printf("Constant value %g at line %d is too big\n.", value, line);
+    if ((int)AS_NUMBER(value) >= MAX_U16) {
+        printf("Constant value %g at line %d is too big\n.", AS_NUMBER(value), line);
         exit(1);
     }
 
