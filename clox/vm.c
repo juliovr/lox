@@ -57,6 +57,7 @@ static void concatenate()
     ObjString *b = AS_STRING(pop());
     ObjString *a = AS_STRING(pop());
 
+#ifndef STRINGS_FLEXIBLE_ARRAY_MEMBER
     int length = a->length + b->length;
     char *chars = ALLOCATE(char, length + 1);
     memcpy(chars, a->chars, a->length);
@@ -64,6 +65,10 @@ static void concatenate()
     chars[length] = '\0';
 
     ObjString *result = take_string(chars, length);
+#else
+    ObjString *result = concatenate_object_strings(a, b);
+#endif
+
     push(OBJ_VAL(result));
 }
 

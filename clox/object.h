@@ -23,11 +23,15 @@ struct Obj {
 struct ObjString {
     Obj obj;
     int length;
-    char *chars;
+    char chars[];
 };
 
+#ifndef STRINGS_FLEXIBLE_ARRAY_MEMBER
 ObjString *take_string(char *chars, int length);
+#endif
+
 ObjString *copy_string(const char *chars, int length);
+ObjString *concatenate_object_strings(ObjString *a, ObjString *b);
 void print_object(Value value);
 
 static inline bool is_obj_type(Value value, ObjType type)

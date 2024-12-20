@@ -7,6 +7,7 @@
 
 #define DEBUG_PRINT_CODE
 #define DEBUG_TRACE_EXECUTION
+#define STRINGS_FLEXIBLE_ARRAY_MEMBER
 
 typedef uint8_t  u8;
 typedef uint16_t u16;
