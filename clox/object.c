@@ -4,6 +4,7 @@
 #include "memory.h"
 #include "object.h"
 #include "value.h"
+#include "table.h"
 #include "vm.h"
 
 #define ALLOCATE_OBJ(type, object_type) (type *)allocate_object(sizeof(type), object_type);
@@ -21,25 +22,59 @@ static Obj *allocate_object(size_t size, ObjType type)
     return object;
 }
 
+/*
+Implement "FNV-1a" hash algorithm.
+*/
+static u32 hash_string(const char *key, int length)
+{
+    u32 hash = 2166136261u;
+    for (int i = 0; i < length; i++) {
+        hash ^= (u8)key[i];
+        hash *= 16777619;
+    }
+
+    return hash;
+}
+
+
 ObjString *copy_string(const char *chars, int length)
 {
+    u32 hash = hash_string(chars, length);
+    ObjString *interned = table_find_string(&vm.strings, chars, length, hash);
+    if (interned != NULL) {
+        return interned;
+    }
+
     int total_size = sizeof(ObjString) + length;
     ObjString *string = (ObjString *)allocate_object(total_size + 1, OBJ_STRING);
     memcpy(string->chars, chars, length);
     string->chars[length] = '\0';
     string->length = length;
+    string->hash = hash;
+
+    table_set(&vm.strings, string, NIL_VAL);
 
     return string;
 }
 
 ObjString *concatenate_object_strings(ObjString *a, ObjString *b)
 {
-    int total_size = sizeof(ObjString) + a->length + b->length;
+    int length = a->length + b->length;
+    int total_size = sizeof(ObjString) + length;
     ObjString *string = (ObjString *)allocate_object(total_size + 1, OBJ_STRING);
     memcpy(string->chars, a->chars, a->length);
     memcpy(string->chars + a->length, b->chars, b->length);
     string->chars[a->length + b->length] = '\0';
-    string->length = a->length + b->length;
+    string->length = length;
+    string->hash = hash_string(string->chars, length);
+    
+    ObjString *interned = table_find_string(&vm.strings, string->chars, length, string->hash);
+    if (interned != NULL) {
+        FREE(ObjString, string);
+        return interned;
+    }
+
+    table_set(&vm.strings, string, NIL_VAL);
 
     return string;
 }
