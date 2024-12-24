@@ -5,3 +5,6 @@ build:
 
 run: build
 	./clox
+
+clean: clox
+	rm clox

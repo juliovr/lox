@@ -168,7 +168,7 @@ static TokenType identifier_type()
         case 'w': return check_keyword(1, 4, "hile", TOKEN_WHILE);
     }
 
-    return TOKEN_UNKNOWN;
+    return TOKEN_IDENTIFIER;
 }
 
 static Token identifier()
