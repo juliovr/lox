@@ -200,6 +200,11 @@ static InterpretResult run()
                 u16 offset = READ_SHORT();
                 vm.ip -= offset;
             } break;
+
+            case OP_SWITCH: {
+                push(peek(0));
+            } break;
+
             case OP_RETURN: {
                 return INTERPRET_OK;
             }

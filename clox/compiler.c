@@ -61,11 +61,19 @@ static Chunk *current_chunk()
     return compiling_chunk;
 }
 
-static void error_at(Token *token, const char *message)
+#define error_at(token, message) error_at_default(__FILE__, __LINE__, token, message)
+#define error(message) error_default(__FILE__, __LINE__, message)
+#define error_at_current(message) error_at_current_default(__FILE__, __LINE__, message)
+
+static void error_at_default(const char *file, int line, Token *token, const char *message)
 {
     if (parser.panic_mode) return;
 
     parser.panic_mode = true;
+
+#ifdef DEBUG_PRINT_ERROR_FILE_LINE
+    fprintf(stderr, "%s:%d: ", file, line);
+#endif
 
     fprintf(stderr, "[line %d] Error", token->line);
 
@@ -82,14 +90,14 @@ static void error_at(Token *token, const char *message)
     parser.had_error = true;
 }
 
-static void error(const char *message)
+static void error_default(const char *file, int line, const char *message)
 {
-    error_at(&parser.previous, message);
+    error_at_default(file, line, &parser.previous, message);
 }
 
-static void error_at_current(const char *message)
+static void error_at_current_default(const char *file, int line, const char *message)
 {
-    error_at(&parser.current, message);
+    error_at_default(file, line, &parser.current, message);
 }
 
 static void advance()
@@ -618,6 +626,57 @@ static void print_statement()
     emit_byte(OP_PRINT);
 }
 
+static void switch_statement()
+{
+    consume(TOKEN_LEFT_PAREN, "Expect '(' after 'switch'.");
+    expression();
+    consume(TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
+
+    consume(TOKEN_LEFT_BRACE, "Expect '{' after 'switch' condition.");
+    int cases[256];
+    int case_count = 0;
+    while (check(TOKEN_CASE)) {
+        if (case_count > 0) {
+            emit_byte(OP_POP); // Pop the computed bool value from the previous evaluated case.
+        }
+
+        emit_byte(OP_SWITCH);
+
+        advance();
+        expression();
+        consume(TOKEN_COLON, "Expect ':' after 'case'.");
+
+        emit_byte(OP_EQUAL);
+
+        int jump_no_match_case = emit_jump(OP_JUMP_IF_FALSE);
+        emit_byte(OP_POP);
+
+        statement();
+        cases[case_count++] = emit_jump(OP_JUMP);
+
+        patch_jump(jump_no_match_case);
+    }
+
+    if (match(TOKEN_DEFAULT)) {
+        consume(TOKEN_COLON, "Expect ':' after 'default'.");
+        statement();
+
+        // NOTE: default does not need to emit a jump to the end because it is *always* the last case in the switch,
+        // so it just continues.
+    }
+
+    if (case_count == 0) {
+        error("Switch statement with no cases or default.");
+    }
+
+    consume(TOKEN_RIGHT_BRACE, "Expect '}' after 'switch' cases.");
+
+    for (int i = 0; i < case_count; i++) {
+        patch_jump(cases[i]);
+    }
+    emit_byte(OP_POP);
+}
+
 static void while_statement()
 {
     int loop_start = current_chunk()->count;
@@ -688,6 +747,8 @@ static void statement()
         for_statement();
     } else if (match(TOKEN_IF)) {
         if_statement();
+    } else if (match(TOKEN_SWITCH)) {
+        switch_statement();
     } else if (match(TOKEN_WHILE)) {
         while_statement();
     } else if (match(TOKEN_LEFT_BRACE)) {

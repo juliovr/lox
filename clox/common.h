@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define DEBUG_PRINT_ERROR_FILE_LINE
 #define DEBUG_PRINT_CODE
 #define DEBUG_TRACE_EXECUTION
 #define STRINGS_FLEXIBLE_ARRAY_MEMBER
