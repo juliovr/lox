@@ -2,16 +2,23 @@
 #define clox_object_h
 
 #include "common.h"
+#include "chunk.h"
 #include "value.h"
 
 #define OBJ_TYPE(value)     (AS_OBJ(value)->type)
 
+#define IS_FUNCTION(value)  is_obj_type(value, OBJ_FUNCTION)
+#define IS_NATIVE(value)    is_obj_type(value, OBJ_NATIVE)
 #define IS_STRING(value)    is_obj_type(value, OBJ_STRING)
 
+#define AS_FUNCTION(value)  ((ObjFunction *)AS_OBJ(value))
+#define AS_NATIVE(value)    ((ObjNative *)AS_OBJ(value))
 #define AS_STRING(value)    ((ObjString *)AS_OBJ(value))
 #define AS_CSTRING(value)   (((ObjString *)AS_OBJ(value))->chars)
 
 typedef enum {
+    OBJ_FUNCTION,
+    OBJ_NATIVE,
     OBJ_STRING,
 } ObjType;
 
@@ -19,6 +26,21 @@ struct Obj {
     ObjType type;
     struct Obj *next;
 };
+
+typedef struct {
+    Obj obj;
+    int arity;
+    Chunk chunk;
+    ObjString *name;
+} ObjFunction;
+
+typedef Value (*NativeFn)(int arg_count, Value *args);
+
+typedef struct {
+    Obj obj;
+    int arity;
+    NativeFn function;
+} ObjNative;
 
 struct ObjString {
     Obj obj;
@@ -31,6 +53,8 @@ struct ObjString {
 ObjString *take_string(char *chars, int length);
 #endif
 
+ObjFunction *new_function();
+ObjNative *new_native(NativeFn function, int arity);
 ObjString *copy_string(const char *chars, int length);
 ObjString *concatenate_object_strings(ObjString *a, ObjString *b);
 void print_object(Value value);

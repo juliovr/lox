@@ -36,6 +36,34 @@ static u32 hash_string(const char *key, int length)
     return hash;
 }
 
+static void print_function(ObjFunction *function)
+{
+    if (function->name == NULL) {
+        printf("<script>");
+        return;
+    }
+    
+    printf("<fn %s>", function->name->chars);
+}
+
+ObjFunction *new_function()
+{
+    ObjFunction *function = ALLOCATE_OBJ(ObjFunction, OBJ_FUNCTION)
+    function->arity = 0;
+    function->name = NULL;
+    init_chunk(&function->chunk);
+
+    return function;
+}
+
+ObjNative *new_native(NativeFn function, int arity)
+{
+    ObjNative *native = ALLOCATE_OBJ(ObjNative, OBJ_NATIVE);
+    native->arity = arity;
+    native->function = function;
+
+    return native;
+}
 
 ObjString *copy_string(const char *chars, int length)
 {
@@ -82,6 +110,12 @@ ObjString *concatenate_object_strings(ObjString *a, ObjString *b)
 void print_object(Value value)
 {
     switch (OBJ_TYPE(value)) {
+        case OBJ_FUNCTION:
+            print_function(AS_FUNCTION(value));
+            break;
+        case OBJ_NATIVE:
+            printf("<native fn");
+            break;
         case OBJ_STRING:
             printf("%s", AS_CSTRING(value));
             break;
