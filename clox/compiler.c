@@ -4,6 +4,7 @@
 
 #include "common.h"
 #include "compiler.h"
+#include "memory.h"
 #include "chunk.h"
 #include "scanner.h"
 #include "object.h"
@@ -275,7 +276,7 @@ static void end_scope()
         } else {
             emit_byte(OP_POP); // @Optimize: A simple optimization you could add to your Lox implementation is a specialized OP_POPN instruction that takes an operand for the number of slots to pop and pops them all at once.
         }
-        
+
         current->local_count--;
     }
 }
@@ -948,4 +949,13 @@ ObjFunction *compile(const char *source)
     ObjFunction *function = end_compiler();
 
     return parser.had_error ? NULL : function;
+}
+
+void mark_compiler_roots()
+{
+    Compiler *compiler = current;
+    while (compiler != NULL) {
+        mark_object((Obj *)compiler->function);
+        compiler = compiler->enclosing;
+    }
 }

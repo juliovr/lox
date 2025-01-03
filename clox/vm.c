@@ -62,6 +62,13 @@ void init_VM()
     reset_stack();
     vm.objects = NULL;
 
+    vm.bytes_allocated = 0;
+    vm.next_gc = 1024 * 1024;
+    
+    vm.gray_count = 0;
+    vm.gray_capacity = 0;
+    vm.gray_stack = NULL;
+
     init_table(&vm.globals);
     init_table(&vm.strings);
 
@@ -135,7 +142,7 @@ static ObjUpvalue *capture_upvalue(Value *local)
     ObjUpvalue *upvalue = vm.open_upvalues;
     while (upvalue != NULL && upvalue->location > local) {
         prev_upvalue = upvalue;
-        upvalue = upvalue->next;
+        upvalue = (ObjUpvalue *)upvalue->next;
     }
 
     if (upvalue != NULL && upvalue->location == local) {
@@ -143,12 +150,12 @@ static ObjUpvalue *capture_upvalue(Value *local)
     }
 
     ObjUpvalue *created_upvalue = new_upvalue(local);
-    created_upvalue->next = upvalue;
+    created_upvalue->next = (struct ObjUpvalue *)upvalue;
 
     if (prev_upvalue == NULL) {
         vm.open_upvalues = created_upvalue;
     } else {
-        prev_upvalue->next = created_upvalue;
+        prev_upvalue->next = (struct ObjUpvalue *)created_upvalue;
     }
 
     return created_upvalue;
@@ -161,7 +168,7 @@ static void close_upvalues(Value *last)
         upvalue->closed = *upvalue->location;
         upvalue->location = &upvalue->closed;
 
-        vm.open_upvalues = upvalue->next;
+        vm.open_upvalues = (ObjUpvalue *)upvalue->next;
     }
 }
 
@@ -172,8 +179,8 @@ static bool is_falsey(Value value)
 
 static void concatenate()
 {
-    ObjString *b = AS_STRING(pop());
-    ObjString *a = AS_STRING(pop());
+    ObjString *b = AS_STRING(peek(0));
+    ObjString *a = AS_STRING(peek(1));
 
 #ifndef STRINGS_FLEXIBLE_ARRAY_MEMBER
     int length = a->length + b->length;
@@ -186,6 +193,8 @@ static void concatenate()
 #else
     ObjString *result = concatenate_object_strings(a, b);
 #endif
+    pop();
+    pop();
 
     push(OBJ_VAL(result));
 }
